@@ -3,6 +3,17 @@ Encryptor
 
 A encrytion program to encrypt and decrypt files with secret keys
 
+Dependencies
+------------
+	libargs_parser (https://github.com/tharindu96/libargs_parser)
+
+Installation
+------------
+	./autogen.sh
+	./configure
+	make
+	make install
+
 Usage
 -----
 
