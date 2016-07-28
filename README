@@ -1,0 +1,24 @@
+Encryptor
+=========
+
+A encrytion program to encrypt and decrypt files with secret keys
+
+Usage
+-----
+
+encryption:
+	encryptor --encrypt --file hello_world --output encrypted_file --key secret_key
+
+decryption:
+	encryptor --decrypt --file encrypted_file --key secret_key (file will be decrypted as the original file `hello_world`)
+	encryptor --decrypt --file encrypted_file --output encrypted_file --key secret_key
+
+Options
+-------
+
+	--encrypt | -e - encrypt file
+	--decrypt | -d - decrypt file
+	--file | -f [file_path] - the file to be encrypted or decrypted
+	--output | -o [output_path] - the encrypted or decrypted file
+	--key | -k [secret_key] - the key from which to encrypt or decrypt the file
+	--help | -h - this message

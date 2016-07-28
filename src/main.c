@@ -13,7 +13,7 @@
 
 #include <args_parser/args_parser.h>
 
-#define BUFFER_SIZE 1024
+#define BUFFER_SIZE 8192 // 4096
 
 typedef struct {
 	mode_t mode;
@@ -137,14 +137,23 @@ void encrypt_file(char *file, char *output, char *key) {
 	
 	buffer = (char*)malloc(sizeof(char) * BUFFER_SIZE);
 	ssize_t read_count = 0;
+	off_t total_size = stat_buffer.st_size;
+	off_t done_size = 0;
+	printf("encrypting...\n");
 	while((read_count = read(rfd, (void*)buffer, BUFFER_SIZE)) > 0) {
+		done_size += read_count;
 		for(ssize_t i = 0; i < read_count; i++) {
 			buffer[i] += total_offset;
 		}
 		if(write(wfd, (void*)buffer, read_count) == -1) {
 			perror("wfd\n");
 		}
+		printf("\r%03.3f%%", 100.0f * ((float)done_size / (float)total_size));
 	}
+
+	printf("\n");
+
+	printf("%s --> %s\n", file, output);
 
 	close(rfd);
 	close(wfd);
@@ -169,6 +178,8 @@ void decrypt_file(char *file, char *output, char *key) {
 		printf("%s: %s\n", file, strerror(errno));
 		return;
 	}
+
+	off_t total_size = stat_buffer.st_size - sizeof(FileHeader);
 
 	char *buffer;
 	buffer = (char*)malloc(sizeof(FileHeader));
@@ -207,14 +218,22 @@ void decrypt_file(char *file, char *output, char *key) {
 	buffer = (char*) malloc(sizeof(char) * BUFFER_SIZE);
 	ssize_t read_count = 0;
 
+	off_t done_size = 0;
+	printf("decrypting...\n");
 	while((read_count = read(rfd, (void*)buffer, BUFFER_SIZE)) > 0) {
+		done_size += read_count;
 		for(ssize_t i = 0; i < read_count; i++) {
 			buffer[i] -= total_offset;
 		}
 		if(write(wfd, buffer, read_count) == -1) {
 			perror("wfd\n");
 		}
+		printf("\r%3.3f", 100.0f * ((float)done_size / (float)total_size));
 	}
+
+	printf("\n");
+
+	printf("%s --> %s\n", file, output);
 
 	close(rfd);
 	close(wfd);
