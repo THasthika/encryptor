@@ -5,7 +5,6 @@ A encrytion program to encrypt and decrypt files with secret keys
 
 Dependencies
 ------------
-	libargs_parser (https://github.com/tharindu96/libargs_parser)
 	libssl	(apt-get install libssl-dev)
 
 Installation

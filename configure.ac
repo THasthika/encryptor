@@ -9,7 +9,6 @@ AC_CONFIG_MACRO_DIR([m4])
 AC_PROG_CC
 
 # Checks for libraries.
-AC_CHECK_LIB(args_parser, args_parser_create,, AC_MSG_ERROR([args_parser library required, check README file for more info.]))
 PKG_CHECK_MODULES([OPENSSL], [openssl],, AC_MSG_ERROR([openssl is required.]))
 
 # Checks for header files.

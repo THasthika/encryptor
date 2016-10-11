@@ -11,8 +11,6 @@
 #include <openssl/sha.h>
 #include <openssl/md5.h>
 
-#include <args_parser/args_parser.h>
-
 #define BUFFER_SIZE 8192 // 4096
 
 typedef struct {
@@ -21,7 +19,8 @@ typedef struct {
 	char filename[256];
 } FileHeader;
 
-void get_file_name(char *path, char **name) {
+void get_file_name(char *path, char **name)
+{
 	char *l_del = path;
 	for(int i = 0; i < strlen(path); i++) {
 		if(path[i] == '/')
@@ -30,7 +29,8 @@ void get_file_name(char *path, char **name) {
 	*name = l_del;
 }
 
-void show_help() {
+void show_help()
+{
 	printf("Encryptor\n");
 	printf("\tUsage:\n");
 	printf("\t\tencryptor --encrypt --key secret --file x --output y\n");
@@ -44,7 +44,8 @@ void show_help() {
 	printf("\t\t--help | -h - displays this message\n");
 }
 
-void sha1(const char *message, char output_buffer[41]) {
+void sha1(const char *message, char output_buffer[41])
+{
 	unsigned char hash[SHA_DIGEST_LENGTH];
 	SHA_CTX ctx;
 	SHA1_Init(&ctx);
@@ -56,7 +57,8 @@ void sha1(const char *message, char output_buffer[41]) {
 	output_buffer[SHA_DIGEST_LENGTH * 2] = 0;
 }
 
-void md5(const char *message, char output_buffer[33]) {
+void md5(const char *message, char output_buffer[33])
+{
 	unsigned char hash[MD5_DIGEST_LENGTH];
 	MD5_CTX ctx;
 	MD5_Init(&ctx);
@@ -68,7 +70,8 @@ void md5(const char *message, char output_buffer[33]) {
 	output_buffer[MD5_DIGEST_LENGTH * 2] = 0;
 }
 
-void hash(const char *message, char output_buffer[97]) {
+void hash(const char *message, char output_buffer[97])
+{
 	char sha1_hash[65];
 	char md5_hash[33];
 
@@ -79,7 +82,8 @@ void hash(const char *message, char output_buffer[97]) {
 	strcat(output_buffer, md5_hash);
 }
 
-unsigned int get_offset(const char *seed) {
+unsigned int get_offset(const char *seed)
+{
 	unsigned int ret = 1;
 	for(int i = 0; i < strlen(seed); i++) {
 		ret += (unsigned int)seed[i];
@@ -87,7 +91,8 @@ unsigned int get_offset(const char *seed) {
 	return ret % 256;
 }
 
-void encrypt_file(char *file, char *output, char *key) {
+void encrypt_file(char *file, char *output, char *key)
+{
 	struct stat stat_buffer;
 	if(stat(output, &stat_buffer) != -1) {
 		printf("%s: %s\n", output, "file already exists!");
@@ -159,7 +164,8 @@ void encrypt_file(char *file, char *output, char *key) {
 	close(wfd);
 }
 
-void decrypt_file(char *file, char *output, char *key) {
+void decrypt_file(char *file, char *output, char *key)
+{
 	char hashstr[97];
 	hash(key, hashstr);
 	
@@ -239,40 +245,34 @@ void decrypt_file(char *file, char *output, char *key) {
 	close(wfd);
 }
 
-int main(int argc, char **argv) {
+int main(int argc, char **argv)
+{
 
-	char *help;
-	char *encrypt;
-	char *decrypt;
-	char *key;
-	char *file;
-	char *output;
+	char help = 0;
+	char encrypt = 0;
+	char decrypt = 0;
+	char *key = NULL;
+	char *file = NULL;
+	char *output = NULL;
 
-	ArgsParser *parser = (ArgsParser*) malloc(sizeof(ArgsParser));
-	args_parser_create(parser);
-
-	args_parser_add_option(parser, "help", ARGS_PARSER_BOOL, &help);
-	args_parser_add_option(parser, "h", ARGS_PARSER_SHORT | ARGS_PARSER_BOOL, &help);
-
-	args_parser_add_option(parser, "encrypt", ARGS_PARSER_BOOL, &encrypt);
-	args_parser_add_option(parser, "e", ARGS_PARSER_SHORT | ARGS_PARSER_BOOL, &encrypt);
-
-	args_parser_add_option(parser, "decrypt", ARGS_PARSER_BOOL, &decrypt);
-	args_parser_add_option(parser, "d", ARGS_PARSER_SHORT | ARGS_PARSER_BOOL, &decrypt);
-
-	args_parser_add_option(parser, "key", ARGS_PARSER_NORMAL, &key);
-	args_parser_add_option(parser, "k", ARGS_PARSER_NORMAL | ARGS_PARSER_SHORT, &key);
-
-	args_parser_add_option(parser, "file", ARGS_PARSER_NORMAL, &file);
-	args_parser_add_option(parser, "f", ARGS_PARSER_NORMAL | ARGS_PARSER_SHORT, &file);
-
-	args_parser_add_option(parser, "output", ARGS_PARSER_NORMAL, &output);
-	args_parser_add_option(parser, "o", ARGS_PARSER_NORMAL | ARGS_PARSER_SHORT, &output);
-
-	args_parser_parse(parser, argc, argv);
-
-	args_parser_destroy(parser);
-	free(parser);
+	for(int i = 0; i < argc; i++) {
+		if(strcmp(argv[i], "--help") == 0 || strcmp(argv[i], "-h") == 0) {
+			help = 1;
+		} else if(strcmp(argv[i], "--encrypt") == 0 || strcmp(argv[i], "-e") == 0) {
+			encrypt = 1;
+		} else if(strcmp(argv[i], "--decrypt") == 0 || strcmp(argv[i], "-d") == 0) {
+			decrypt = 1;
+		} else if(strcmp(argv[i], "--key") == 0 || strcmp(argv[i], "-k") == 0) {
+			if(++i < argc)
+				key = argv[i];
+		} else if(strcmp(argv[i], "--file") == 0 || strcmp(argv[i], "-f") == 0) {
+			if(++i < argc)
+				file = argv[i];
+		} else if(strcmp(argv[i], "--output") == 0 || strcmp(argv[i], "-o") == 0) {
+			if(++i < argc)
+				output = argv[i];
+		}
+	}
 
 	if(help) {
 		show_help();
